@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 智慧程式碼生成器</title>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <style>
+        body {
+            background: #f4f6f9;
+            font-family: "Segoe UI", sans-serif;
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.12);
+            margin-bottom: 25px;
+        }
+        textarea, select {
+            width: 100%;
+            padding: 12px;
+            font-size: 15px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            margin-top: 6px;
+            margin-bottom: 15px;
+        }
+        button {
+            background: #4CAF50;
+            padding: 12px 25px;
+            font-size: 16px;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result-card {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .copy-btn {
+            background: #555;
+            padding: 6px 12px;
+            float: right;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+        }
+        h2.section {
+            color: #61afef;
+        }
+        .advice-card {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+        }
+        .advice-card p {
+            margin: 0;
+            color: #856404;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="card">
+            <h1>📘 AI 程式碼生成器</h1>
+            <p>輸入需求，選擇語言，AI 會根據專用模板生成高品質程式碼</p>
+
+            <form method="POST">
+                <label>需求描述：</label>
+                <textarea name="description" placeholder="例如：使用 Dijkstra 演算法計算從 A 到 B 的最短路徑..." required></textarea>
+
+                <label>選擇語言：</label>
+                <select name="language">
+                    <option>Python</option>
+                    <option>JavaScript</option>
+                    <option>Java</option>
+                    <option>C</option>
+                    <option>C++</option>
+                </select>
+
+                <!-- 新增測試輸入欄位 -->
+                <label>測試輸入（可選）：</label>
+                <textarea name="test_input" placeholder="輸入程式測資，例如多行數字或文字..." rows="4"></textarea>
+
+                <button type="submit">🚀 生成程式碼</button>
+            </form>
+        </div>
+
+        {% if result %}
+
+            <div class="card">
+                <h2 class="section">🔧 生成的程式碼</h2>
+                <div class="copy-btn" onclick="copyCode()">📋 複製</div>
+                <pre class="result-card"><code id="code-block" class="language-{{ language|lower }}">{{ result }}</code></pre>
+            </div>
+
+            <div class="card">
+                <h2 class="section">✨ 程式碼審閱與優化建議</h2>
+                <div class="advice-card" style="white-space: pre-line;">
+                    {{ optimization_advice }}
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="section">📊 時間複雜度分析</h2>
+                <pre>{{ complexity }}</pre>
+            </div>
+
+            <div class="card">
+                <h2 class="section">🛠 語法檢查結果</h2>
+                <pre>{{ lint }}</pre>
+            </div>
+
+            <div class="card">
+                <h2 class="section">🚀 GPT 模擬執行結果</h2>
+                <pre class="result-card"><code>{{ simulated_output }}</code></pre>
+            </div>
+
+            <div class="card">
+                <h2 class="section">📝 JDoodle 測試輸出結果</h2>
+                <pre class="result-card"><code>{{ jdoodle_output }}</code></pre>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/prism.min.js"></script>
+    <script>
+        function copyCode() {
+            const code = document.getElementById("code-block").textContent;
+            navigator.clipboard.writeText(code);
+            alert("已複製程式碼！");
+        }
+    </script>
+
+</body>
+</html>
