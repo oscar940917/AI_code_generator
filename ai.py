@@ -23,6 +23,8 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPEN_API_KEY")
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")  # 預設使用較經濟的模型
+MAX_DESCRIPTION_LENGTH = int(os.getenv("MAX_DESCRIPTION_LENGTH", "1000"))
 
 # JDoodle API 相關
 JDOODLE_CLIENT_ID = os.getenv("JDOODLE_CLIENT_ID")
@@ -182,9 +184,9 @@ def generate_with_gpt(template, user_desc, language):
 """
     
     try:
-        # 使用正確的 OpenAI API
+        # 使用可配置的 OpenAI 模型
         response = client.chat.completions.create(
-            model="gpt-4",
+            model=OPENAI_MODEL,
             messages=[
                 {"role": "system", "content": "你是一位專業的程式教學助教，擅長生成高品質程式碼。"},
                 {"role": "user", "content": prompt}
@@ -245,7 +247,7 @@ def simulate_output_with_gpt(code, language, test_input):
     
     try:
         response = client.chat.completions.create(
-            model="gpt-4",
+            model=OPENAI_MODEL,
             messages=[
                 {"role": "system", "content": "你是一個程式執行模擬器。"},
                 {"role": "user", "content": prompt}
@@ -376,8 +378,8 @@ def home():
                 )
             
             # 長度限制
-            if len(description) > 1000:
-                error_message = "需求描述過長（最多 1000 字元）"
+            if len(description) > MAX_DESCRIPTION_LENGTH:
+                error_message = f"需求描述過長（最多 {MAX_DESCRIPTION_LENGTH} 字元）"
                 logger.warning(f"需求描述過長: {len(description)} 字元")
                 return render_template(
                     "index.html",
