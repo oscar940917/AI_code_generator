@@ -299,13 +299,21 @@ def home():
         mode = request.form.get("mode", "description")
         language = request.form.get("language")
         test_input = request.form.get("test_input", "")
+        ai_json = None
 
         if mode == "completion":
             # 程式碼補全模式
             partial_code = request.form.get("partial_code", "")
             description = request.form.get("description", "")
             
-            ai_json = complete_code_with_gpt(partial_code, language, description)
+            # 驗證部分程式碼不為空
+            if not partial_code.strip():
+                result = "⚠️ 錯誤：請提供部分程式碼"
+                optimization_advice = "程式碼補全模式需要輸入部分程式碼"
+                complexity_text = ""
+                lint_result = ""
+            else:
+                ai_json = complete_code_with_gpt(partial_code, language, description)
         else:
             # 描述生成模式（原有功能）
             description = request.form.get("description")
@@ -313,22 +321,24 @@ def home():
             template = TEMPLATES.get(category, "")
             ai_json = generate_with_gpt(template, description, language)
 
-        result = ai_json.get("code", "")
-        explain = ai_json.get("explanation", "")
-        time_c = ai_json.get("complexity", {}).get("time", "")
-        space_c = ai_json.get("complexity", {}).get("space", "")
-        complexity_text = f"時間：{time_c}\n空間：{space_c}"
-        optimization_advice = textwrap.dedent(explain).strip()
+        # 只有在成功獲得 ai_json 時才處理結果
+        if ai_json:
+            result = ai_json.get("code", "")
+            explain = ai_json.get("explanation", "")
+            time_c = ai_json.get("complexity", {}).get("time", "")
+            space_c = ai_json.get("complexity", {}).get("space", "")
+            complexity_text = f"時間：{time_c}\n空間：{space_c}"
+            optimization_advice = textwrap.dedent(explain).strip()
 
-        lint_result = lint_code(language, result)
-        quota_exceeded = not check_quota()
+            lint_result = lint_code(language, result)
+            quota_exceeded = not check_quota()
 
-        # GPT 模擬執行 → online_result
-        simulated_output = simulate_output_with_gpt(result, language, test_input)
+            # GPT 模擬執行 → online_result
+            simulated_output = simulate_output_with_gpt(result, language, test_input)
 
-        # JDoodle 真正執行 → test_output
-        if test_input.strip():
-            jdoodle_output = run_jdoodle_code(result, language, test_input)
+            # JDoodle 真正執行 → test_output
+            if test_input.strip():
+                jdoodle_output = run_jdoodle_code(result, language, test_input)
 
     return render_template(
         "index.html",
