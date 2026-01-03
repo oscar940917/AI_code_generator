@@ -9,8 +9,9 @@
 
     <style>
         body {
-            background: #f4f6f9;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             font-family: "Segoe UI", sans-serif;
+            min-height: 100vh;
         }
         .container {
             max-width: 900px;
@@ -19,59 +20,136 @@
         }
         .card {
             background: white;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 3px 15px rgba(0,0,0,0.12);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
             margin-bottom: 25px;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+        }
+        h1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.5em;
+            margin-bottom: 10px;
         }
         textarea, select {
             width: 100%;
             padding: 12px;
             font-size: 15px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
             margin-top: 6px;
             margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+        textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         button {
-            background: #4CAF50;
-            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 14px 28px;
             font-size: 16px;
+            font-weight: 600;
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
         button:hover {
-            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        .mode-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .mode-btn {
+            flex: 1;
+            padding: 15px;
+            border: 3px solid #e0e0e0;
+            background: white;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: #666;
+        }
+        .mode-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        .mode-btn.active {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-color: #f5576c;
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+        }
+        .mode-btn:first-child.active {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-color: #00f2fe;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+        }
+        .mode-content {
+            display: none;
+        }
+        .mode-content.active {
+            display: block;
+        }
+        label {
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
         }
         .result-card {
-            background: #2d2d2d;
+            background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
             color: #f8f8f2;
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 20px;
+            border: 2px solid #444;
         }
         .copy-btn {
-            background: #555;
-            padding: 6px 12px;
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            padding: 8px 16px;
             float: right;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             color: white;
+            font-weight: 600;
+            transition: transform 0.2s;
+            border: none;
+        }
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(250, 112, 154, 0.4);
         }
         h2.section {
-            color: #61afef;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.5em;
         }
         .advice-card {
-            background: #fff3cd;
-            border-left: 5px solid #ffc107;
-            padding: 15px;
-            border-radius: 8px;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            border-left: 5px solid #e17055;
+            padding: 20px;
+            border-radius: 12px;
             white-space: pre-wrap;
+            box-shadow: 0 4px 15px rgba(225, 112, 85, 0.2);
         }
         .advice-card p {
             margin: 0;
-            color: #856404;
+            color: #2d3436;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -81,11 +159,35 @@
 
         <div class="card">
             <h1>📘 AI 程式碼生成器</h1>
-            <p>輸入需求，選擇語言，AI 會根據專用模板生成高品質程式碼</p>
+            <p>輸入需求或部分程式碼，AI 會生成高品質完整程式碼</p>
 
-            <form method="POST">
-                <label>需求描述：</label>
-                <textarea name="description" placeholder="例如：使用 Dijkstra 演算法計算從 A 到 B 的最短路徑..." required></textarea>
+            <!-- 模式選擇器 -->
+            <div class="mode-selector">
+                <button type="button" class="mode-btn active" id="desc-mode-btn" onclick="switchMode('description')">
+                    📝 描述生成模式
+                </button>
+                <button type="button" class="mode-btn" id="comp-mode-btn" onclick="switchMode('completion')">
+                    🔧 程式碼補全模式
+                </button>
+            </div>
+
+            <form method="POST" id="main-form">
+                <input type="hidden" name="mode" id="mode-input" value="description">
+
+                <!-- 描述生成模式的表單 -->
+                <div id="description-mode" class="mode-content active">
+                    <label>需求描述：</label>
+                    <textarea name="description" placeholder="例如：使用 Dijkstra 演算法計算從 A 到 B 的最短路徑..." rows="4"></textarea>
+                </div>
+
+                <!-- 程式碼補全模式的表單 -->
+                <div id="completion-mode" class="mode-content">
+                    <label>部分程式碼：</label>
+                    <textarea name="partial_code" placeholder="輸入部分程式碼，例如：&#10;def fibonacci(n):&#10;    # TODO: 實作費波那契數列" rows="8"></textarea>
+                    
+                    <label>額外需求（可選）：</label>
+                    <textarea name="description" placeholder="例如：請使用遞迴方式實作..." rows="2"></textarea>
+                </div>
 
                 <label>選擇語言：</label>
                 <select name="language">
@@ -150,6 +252,32 @@
             navigator.clipboard.writeText(code);
             alert("已複製程式碼！");
         }
+
+        function switchMode(mode) {
+            // 更新隱藏的模式輸入
+            document.getElementById("mode-input").value = mode;
+            
+            // 更新按鈕樣式
+            document.getElementById("desc-mode-btn").classList.remove("active");
+            document.getElementById("comp-mode-btn").classList.remove("active");
+            
+            if (mode === "description") {
+                document.getElementById("desc-mode-btn").classList.add("active");
+                document.getElementById("description-mode").classList.add("active");
+                document.getElementById("completion-mode").classList.remove("active");
+            } else {
+                document.getElementById("comp-mode-btn").classList.add("active");
+                document.getElementById("completion-mode").classList.add("active");
+                document.getElementById("description-mode").classList.remove("active");
+            }
+        }
+
+        // 頁面載入時根據後端返回的模式設定
+        {% if mode %}
+        window.onload = function() {
+            switchMode("{{ mode }}");
+        }
+        {% endif %}
     </script>
 
 </body>

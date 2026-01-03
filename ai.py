@@ -161,6 +161,51 @@ def generate_with_gpt(template, user_desc, language):
         }
 
 # -----------------------------
+# GPT 程式碼補全
+# -----------------------------
+def complete_code_with_gpt(partial_code, language, user_desc=""):
+    prompt = f"""
+你是一位資工系程式助教。
+
+使用者提供了部分程式碼，請幫助補全成完整可執行的程式碼。
+
+⚠️ 請務必輸出「完整 JSON」，格式如下：
+
+{{
+  "code": "<補全後的完整程式碼>",
+  "complexity": {{
+    "time": "<時間複雜度 Big-O>",
+    "space": "<空間複雜度 Big-O>"
+  }},
+  "explanation": "<簡要解釋補全的內容和邏輯（不超過 5 句）>"
+}}
+
+不要使用 ```json、``` 或任何 markdown 標記。
+
+程式語言：{language}
+
+部分程式碼：
+{partial_code}
+
+{"額外需求：" + user_desc if user_desc else ""}
+"""
+    response = client.responses.create(
+        model="gpt-4.1",
+        input=prompt,
+        max_output_tokens=2000
+    )
+    raw = response.output_text.strip().replace("```json", "").replace("```", "").strip()
+    try:
+        data = json.loads(raw)
+        return data
+    except:
+        return {
+            "code": raw,
+            "complexity": {"time": "N/A", "space": "N/A"},
+            "explanation": "⚠️ JSON 解析失敗，已顯示原始輸出。"
+        }
+
+# -----------------------------
 # GPT 模擬測試輸出
 # -----------------------------
 def simulate_output_with_gpt(code, language, test_input):
@@ -248,32 +293,52 @@ def run_jdoodle_code(code, language, test_input=""):
 def home():
     result = optimization_advice = complexity_text = lint_result = simulated_output = jdoodle_output = language = None
     quota_exceeded = False
+    mode = "description"  # 預設模式
 
     if request.method == "POST":
-        description = request.form.get("description")
+        mode = request.form.get("mode", "description")
         language = request.form.get("language")
         test_input = request.form.get("test_input", "")
+        ai_json = None
 
-        category = classify(description)
-        template = TEMPLATES.get(category, "")
-        ai_json = generate_with_gpt(template, description, language)
+        if mode == "completion":
+            # 程式碼補全模式
+            partial_code = request.form.get("partial_code", "")
+            description = request.form.get("description", "")
+            
+            # 驗證部分程式碼不為空
+            if not partial_code.strip():
+                result = "⚠️ 錯誤：請提供部分程式碼"
+                optimization_advice = "程式碼補全模式需要輸入部分程式碼"
+                complexity_text = ""
+                lint_result = ""
+            else:
+                ai_json = complete_code_with_gpt(partial_code, language, description)
+        else:
+            # 描述生成模式（原有功能）
+            description = request.form.get("description")
+            category = classify(description)
+            template = TEMPLATES.get(category, "")
+            ai_json = generate_with_gpt(template, description, language)
 
-        result = ai_json.get("code", "")
-        explain = ai_json.get("explanation", "")
-        time_c = ai_json.get("complexity", {}).get("time", "")
-        space_c = ai_json.get("complexity", {}).get("space", "")
-        complexity_text = f"時間：{time_c}\n空間：{space_c}"
-        optimization_advice = textwrap.dedent(explain).strip()
+        # 只有在成功獲得 ai_json 時才處理結果
+        if ai_json:
+            result = ai_json.get("code", "")
+            explain = ai_json.get("explanation", "")
+            time_c = ai_json.get("complexity", {}).get("time", "")
+            space_c = ai_json.get("complexity", {}).get("space", "")
+            complexity_text = f"時間：{time_c}\n空間：{space_c}"
+            optimization_advice = textwrap.dedent(explain).strip()
 
-        lint_result = lint_code(language, result)
-        quota_exceeded = not check_quota()
+            lint_result = lint_code(language, result)
+            quota_exceeded = not check_quota()
 
-        # GPT 模擬執行 → online_result
-        simulated_output = simulate_output_with_gpt(result, language, test_input)
+            # GPT 模擬執行 → online_result
+            simulated_output = simulate_output_with_gpt(result, language, test_input)
 
-        # JDoodle 真正執行 → test_output
-        if test_input.strip():
-            jdoodle_output = run_jdoodle_code(result, language, test_input)
+            # JDoodle 真正執行 → test_output
+            if test_input.strip():
+                jdoodle_output = run_jdoodle_code(result, language, test_input)
 
     return render_template(
         "index.html",
@@ -284,7 +349,8 @@ def home():
         simulated_output=simulated_output,
         jdoodle_output=jdoodle_output,
         language=language,
-        quota_exceeded=quota_exceeded
+        quota_exceeded=quota_exceeded,
+        mode=mode
     )
 
 if __name__ == "__main__":
