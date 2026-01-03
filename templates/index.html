@@ -45,6 +45,32 @@
         button:hover {
             background: #45a049;
         }
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        .mode-btn.active {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+        .mode-content {
+            display: none;
+        }
+        .mode-content.active {
+            display: block;
+        }
         .result-card {
             background: #2d2d2d;
             color: #f8f8f2;
@@ -81,11 +107,35 @@
 
         <div class="card">
             <h1>📘 AI 程式碼生成器</h1>
-            <p>輸入需求，選擇語言，AI 會根據專用模板生成高品質程式碼</p>
+            <p>輸入需求或部分程式碼，AI 會生成高品質完整程式碼</p>
 
-            <form method="POST">
-                <label>需求描述：</label>
-                <textarea name="description" placeholder="例如：使用 Dijkstra 演算法計算從 A 到 B 的最短路徑..." required></textarea>
+            <!-- 模式選擇器 -->
+            <div class="mode-selector">
+                <button type="button" class="mode-btn active" id="desc-mode-btn" onclick="switchMode('description')">
+                    📝 描述生成模式
+                </button>
+                <button type="button" class="mode-btn" id="comp-mode-btn" onclick="switchMode('completion')">
+                    🔧 程式碼補全模式
+                </button>
+            </div>
+
+            <form method="POST" id="main-form">
+                <input type="hidden" name="mode" id="mode-input" value="description">
+
+                <!-- 描述生成模式的表單 -->
+                <div id="description-mode" class="mode-content active">
+                    <label>需求描述：</label>
+                    <textarea name="description" placeholder="例如：使用 Dijkstra 演算法計算從 A 到 B 的最短路徑..." rows="4"></textarea>
+                </div>
+
+                <!-- 程式碼補全模式的表單 -->
+                <div id="completion-mode" class="mode-content">
+                    <label>部分程式碼：</label>
+                    <textarea name="partial_code" placeholder="輸入部分程式碼，例如：&#10;def fibonacci(n):&#10;    # TODO: 實作費波那契數列" rows="8"></textarea>
+                    
+                    <label>額外需求（可選）：</label>
+                    <textarea name="description" placeholder="例如：請使用遞迴方式實作..." rows="2"></textarea>
+                </div>
 
                 <label>選擇語言：</label>
                 <select name="language">
@@ -150,6 +200,32 @@
             navigator.clipboard.writeText(code);
             alert("已複製程式碼！");
         }
+
+        function switchMode(mode) {
+            // 更新隱藏的模式輸入
+            document.getElementById("mode-input").value = mode;
+            
+            // 更新按鈕樣式
+            document.getElementById("desc-mode-btn").classList.remove("active");
+            document.getElementById("comp-mode-btn").classList.remove("active");
+            
+            if (mode === "description") {
+                document.getElementById("desc-mode-btn").classList.add("active");
+                document.getElementById("description-mode").classList.add("active");
+                document.getElementById("completion-mode").classList.remove("active");
+            } else {
+                document.getElementById("comp-mode-btn").classList.add("active");
+                document.getElementById("completion-mode").classList.add("active");
+                document.getElementById("description-mode").classList.remove("active");
+            }
+        }
+
+        // 頁面載入時根據後端返回的模式設定
+        {% if mode %}
+        window.onload = function() {
+            switchMode("{{ mode }}");
+        }
+        {% endif %}
     </script>
 
 </body>
