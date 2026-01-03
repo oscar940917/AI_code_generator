@@ -9,8 +9,9 @@
 
     <style>
         body {
-            background: #f4f6f9;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             font-family: "Segoe UI", sans-serif;
+            min-height: 100vh;
         }
         .container {
             max-width: 900px;
@@ -19,51 +20,83 @@
         }
         .card {
             background: white;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 3px 15px rgba(0,0,0,0.12);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
             margin-bottom: 25px;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+        }
+        h1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.5em;
+            margin-bottom: 10px;
         }
         textarea, select {
             width: 100%;
             padding: 12px;
             font-size: 15px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
             margin-top: 6px;
             margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+        textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         button {
-            background: #4CAF50;
-            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 14px 28px;
             font-size: 16px;
+            font-weight: 600;
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
         button:hover {
-            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
         .mode-selector {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 15px;
+            margin-bottom: 25px;
         }
         .mode-btn {
             flex: 1;
-            padding: 12px;
-            border: 2px solid #ddd;
+            padding: 15px;
+            border: 3px solid #e0e0e0;
             background: white;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             font-size: 15px;
+            font-weight: 600;
             transition: all 0.3s;
+            color: #666;
+        }
+        .mode-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
         }
         .mode-btn.active {
-            background: #4CAF50;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
-            border-color: #4CAF50;
+            border-color: #f5576c;
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+        }
+        .mode-btn:first-child.active {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-color: #00f2fe;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
         }
         .mode-content {
             display: none;
@@ -71,33 +104,52 @@
         .mode-content.active {
             display: block;
         }
+        label {
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
         .result-card {
-            background: #2d2d2d;
+            background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
             color: #f8f8f2;
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 20px;
+            border: 2px solid #444;
         }
         .copy-btn {
-            background: #555;
-            padding: 6px 12px;
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            padding: 8px 16px;
             float: right;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             color: white;
+            font-weight: 600;
+            transition: transform 0.2s;
+            border: none;
+        }
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(250, 112, 154, 0.4);
         }
         h2.section {
-            color: #61afef;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.5em;
         }
         .advice-card {
-            background: #fff3cd;
-            border-left: 5px solid #ffc107;
-            padding: 15px;
-            border-radius: 8px;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            border-left: 5px solid #e17055;
+            padding: 20px;
+            border-radius: 12px;
             white-space: pre-wrap;
+            box-shadow: 0 4px 15px rgba(225, 112, 85, 0.2);
         }
         .advice-card p {
             margin: 0;
-            color: #856404;
+            color: #2d3436;
+            font-weight: 500;
         }
     </style>
 </head>
